@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tomatoes Harvest | Multi-Farm System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #1a4d2e 0%, #fbbf24 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(30, 74, 47, 0.95);
+            border-radius: 30px;
+            border: 3px solid #f9d342;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .header {
+            background: linear-gradient(135deg, #2e7d32, #f9a825);
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        .balance {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 50px;
+            margin-top: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .nav {
+            display: flex;
+            background: #0f3b22;
+            padding: 10px;
+            gap: 5px;
+        }
+        .nav-btn {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: #1e4a2f;
+            border: 2px solid #f9d342;
+            border-radius: 25px;
+            color: #f9e572;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .nav-btn.active {
+            background: #f9d342;
+            color: #1e4a2f;
+        }
+        .page {
+            display: none;
+            padding: 20px;
+            min-height: 500px;
+        }
+        .page.active {
+            display: block;
+        }
+        .farm-slider {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 20px;
+            padding: 10px;
+        }
+        .farm-card {
+            flex: 0 0 85%;
+            scroll-snap-align: start;
+            background: #1b4f2a;
+            border: 3px solid #f9d342;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 10px;
+        }
+        .farm-card.locked {
+            opacity: 0.6;
+            position: relative;
+        }
+        .farm-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f9d342;
+            margin-bottom: 10px;
+        }
+        .farm-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+            background: #0f3b22;
+            padding: 10px;
+            border-radius: 15px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-label {
+            color: #f9e572;
+            font-size: 0.8rem;
+        }
+        .stat-value {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .timer {
+            text-align: center;
+            font-size: 2rem;
+            font-family: monospace;
+            color: #f9d342;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(145deg, #d4e157, #6a994e);
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            color: #0a1f0a;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: #17331f;
+            border: 2px solid #f9d342;
+            border-radius: 25px;
+            color: #f9e572;
+        }
+        .leaderboard-table {
+            width: 100%;
+            color: white;
+            border-collapse: collapse;
+        }
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 10px;
+            border-bottom: 1px solid #f9d342;
+            text-align: left;
+        }
+        .bell {
+            background: #0f3b22;
+            padding: 10px;
+            border-radius: 50px;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #f9e572;
+        }
+        .hidden {
+            display: none;
+        }
+        .error {
+            color: #ff8888;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🍅 TOMATOES HARVEST</h1>
+        <div class="balance">
+            🍅 <span id="balanceAmount">0</span> Tomatoes<br>
+            ₦<span id="nairaAmount">0</span>
+        </div>
+    </div>
+
+    <div class="nav">
+        <div class="nav-btn" data-page="home">🏠 Home</div>
+        <div class="nav-btn" data-page="farm">🌱 Farm</div>
+        <div class="nav-btn" data-page="refer">🤝 Refer</div>
+        <div class="nav-btn" data-page="withdraw">💰 Withdraw</div>
+        <div class="nav-btn" data-page="leaderboard">🏆 Top</div>
+    </div>
+
+    <!-- Home Page -->
+    <div id="homePage" class="page active">
+        <div class="bell">
+            <i class="fas fa-bell"></i> This website was created by praise
+        </div>
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 4rem;">🌱👨‍🌾</div>
+            <h3 style="color: #f9e572;">Welcome, <span id="usernameDisplay">Farmer</span>!</h3>
+            <p style="color: white; margin-top: 20px;">Total Harvests: <span id="totalHarvestsDisplay">0</span></p>
+            <p style="color: #f9e572;">1 Tomato = ₦0.10</p>
+        </div>
+    </div>
+
+    <!-- Farm Page -->
+    <div id="farmPage" class="page">
+        <div class="bell">
+            <i class="fas fa-bell"></i> This website was created by praise
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+            <div class="stat"><div class="stat-label">Active Farms</div><div class="stat-value" id="activeFarms">1</div></div>
+            <div class="stat"><div class="stat-label">Total 🍅</div><div class="stat-value" id="farmBalance">0</div></div>
+        </div>
+        <div class="farm-slider" id="farmSlider"></div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button id="prevFarm" style="width: auto; padding: 10px 20px;">◀ Previous</button>
+            <button id="nextFarm" style="width: auto; padding: 10px 20px;">Next ▶</button>
+        </div>
+    </div>
+
+    <!-- Referral Page -->
+    <div id="referPage" class="page">
+        <h3 style="color: #f9d342;">🔗 Your Referral Link</h3>
+        <div style="background: #0f3b22; padding: 15px; border-radius: 15px; margin: 15px 0; word-break: break-all;" id="referralLink"></div>
+        <button id="copyLink">📋 Copy Link</button>
+        <div style="background: #0f3b22; padding: 15px; border-radius: 15px; margin-top: 20px;">
+            <p>Total Referrals: <span id="refCount">0</span></p>
+            <p>Commission Earned: <span id="refEarnings">0</span> 🍅</p>
+            <p style="font-size: 0.8rem; color: #f9e572;">10% of referral's first withdrawal</p>
+        </div>
+    </div>
+
+    <!-- Withdrawal Page -->
+    <div id="withdrawPage" class="page">
+        <h3 style="color: #f9d342;">💰 Withdraw Tomatoes</h3>
+        <p style="color: #f9e572; margin: 10px 0;">Minimum: 4000 🍅 = ₦1500</p>
+        <input type="text" id="bankName" placeholder="Bank Name">
+        <input type="text" id="accountNumber" placeholder="Account Number" maxlength="10">
+        <input type="text" id="accountName" placeholder="Account Name">
+        <input type="number" id="withdrawAmount" placeholder="Amount in Tomatoes" min="4000">
+        <button id="withdrawBtn">Process Withdrawal</button>
+        <div id="withdrawMessage" class="error"></div>
+    </div>
+
+    <!-- Leaderboard Page -->
+    <div id="leaderboardPage" class="page">
+        <div class="bell" style="margin-bottom: 15px;">
+            📞 Need a website? Contact Praise: +234 901 688 4934
+        </div>
+        <h3 style="color: #f9d342;">🏆 Top 10 Farmers</h3>
+        <table class="leaderboard-table">
+            <thead>
+                <tr><th>#</th><th>Username</th><th>🍅 Balance</th><th>Harvests</th></tr>
+            </thead>
+            <tbody id="leaderboardBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Farm configurations
+    const FARMS = [
+        { id: 0, name: "🌱 Starter Farm", plants: 10, perPlant: 2, total: 20, cooldown: 40, cost: 0, unlocked: true },
+        { id: 1, name: "🌿 Golden Farm", plants: 14, perPlant: 3, total: 42, cooldown: 30, cost: 500, unlocked: false },
+        { id: 2, name: "🍅 Ruby Farm", plants: 30, perPlant: 4, total: 120, cooldown: 20, cost: 1000, unlocked: false },
+        { id: 3, name: "💎 Emerald Farm", plants: 40, perPlant: 5, total: 200, cooldown: 10, cost: 1500, unlocked: false },
+        { id: 4, name: "👑 Diamond Farm", plants: 50, perPlant: 6, total: 300, cooldown: 5, cost: 2000, unlocked: false }
+    ];
+
+    // User data
+    let currentUser = null;
+    let farmTimers = {};
+
+    // Initialize storage
+    function initStorage() {
+        if (!localStorage.getItem('users')) {
+            const demoUser = {
+                phone: '0800000000',
+                password: '123456',
+                username: 'DemoFarmer',
+                balance: 100,
+                totalHarvests: 0,
+                farms: FARMS.map(f => ({ unlocked: f.cost === 0, lastHarvest: null, harvestCount: 0 })),
+                referrals: [],
+                refEarnings: 0,
+                refCode: 'DEMO' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+                lastDaily: null
+            };
+            localStorage.setItem('users', JSON.stringify([demoUser]));
+        }
+    }
+
+    // Get all users
+    function getUsers() {
+        return JSON.parse(localStorage.getItem('users') || '[]');
+    }
+
+    // Save users
+    function saveUsers(users) {
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    // Login
+    function login(phone, password) {
+        const users = getUsers();
+        const user = users.find(u => u.phone === phone && u.password === password);
+        if (user) {
+            currentUser = user;
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            return true;
+        }
+        return false;
+    }
+
+    // Signup
+    function signup(phone, password, username) {
+        const users = getUsers();
+        if (users.find(u => u.phone === phone)) return false;
+        
+        const newUser = {
+            phone: phone,
+            password: password,
+            username: username,
+            balance: 10,
+            totalHarvests: 0,
+            farms: FARMS.map(f => ({ unlocked: f.cost === 0, lastHarvest: null, harvestCount: 0 })),
+            referrals: [],
+            refEarnings: 0,
+            refCode: Math.random().toString(36).substr(2, 8).toUpperCase(),
+            lastDaily: null
+        };
+        
+        users.push(newUser);
+        saveUsers(users);
+        return true;
+    }
+
+    // Get current user data
+    function getCurrentUser() {
+        if (!currentUser) {
+            const saved = localStorage.getItem('currentUser');
+            if (saved) currentUser = JSON.parse(saved);
+        }
+        return currentUser;
+    }
+
+    // Update current user
+    function updateUser(updates) {
+        if (!currentUser) return;
+        Object.assign(currentUser, updates);
+        const users = getUsers();
+        const index = users.findIndex(u => u.phone === currentUser.phone);
+        if (index !== -1) users[index] = currentUser;
+        saveUsers(users);
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        updateUI();
+    }
+
+    // Unlock farm
+    window.unlockFarm = function(farmId) {
+        const user = getCurrentUser();
+        if (!user) return;
+        
+        const farm = FARMS[farmId];
+        if (user.farms[farmId].unlocked) {
+            alert('Farm already unlocked!');
+            return;
+        }
+        
+        if (user.balance < farm.cost) {
+            alert(`Need ${farm.cost} tomatoes to unlock this farm!`);
+            return;
+        }
+        
+        user.balance -= farm.cost;
+        user.farms[farmId].unlocked = true;
+        updateUser({ balance: user.balance, farms: user.farms });
+        alert(`🎉 ${farm.name} unlocked successfully!`);
+        renderFarms();
+        updateUI();
+    };
+
+    // Harvest farm
+    window.harvestFarm = function(farmId) {
+        const user = getCurrentUser();
+        if (!user) return;
+        
+        const farm = FARMS[farmId];
+        const farmData = user.farms[farmId];
+        
+        if (!farmData.unlocked) {
+            alert('Farm not unlocked yet!');
+            return;
+        }
+        
+        const now = Date.now();
+        const cooldownMs = farm.cooldown * 60 * 1000;
+        const lastHarvest = farmData.lastHarvest || 0;
+        
+        if (lastHarvest && (now - lastHarvest) < cooldownMs) {
+            const remaining = Math.ceil((cooldownMs - (now - lastHarvest)) / 1000);
+            const mins = Math.floor(remaining / 60);
+            const secs = remaining % 60;
+            alert(`Tomatoes not ready! Wait ${mins}:${secs.toString().padStart(2,'0')}`);
+            return;
+        }
+        
+        // Harvest
+        const earned = farm.total;
+        user.balance += earned;
+        user.totalHarvests++;
+        farmData.lastHarvest = now;
+        farmData.harvestCount++;
+        
+        updateUser({ 
+            balance: user.balance, 
+            totalHarvests: user.totalHarvests,
+            farms: user.farms 
+        });
+        
+        alert(`🌾 Harvested ${earned} tomatoes from ${farm.name}!`);
+        renderFarms();
+        updateUI();
+    };
+
+    // Render farms
+    function renderFarms() {
+        const user = getCurrentUser();
+        if (!user) return;
+        
+        const slider = document.getElementById('farmSlider');
+        if (!slider) return;
+        slider.innerHTML = '';
+        
+        FARMS.forEach((farm, index) => {
+            const farmData = user.farms[index];
+            const isUnlocked = farmData.unlocked;
+            const now = Date.now();
+            const cooldownMs = farm.cooldown * 60 * 1000;
+            const lastHarvest = farmData.lastHarvest || 0;
+            const timeLeft = Math.max(0, cooldownMs - (now - lastHarvest));
+            const isReady = timeLeft === 0;
+            
+            const card = document.createElement('div');
+            card.className = `farm-card ${!isUnlocked ? 'locked' : ''}`;
+            
+            let timerHtml = '';
+            if (isUnlocked) {
+                const mins = Math.floor(timeLeft / 60000);
+                const secs = Math.floor((timeLeft % 60000) / 1000);
+                timerHtml = `<div class="timer">${isReady ? '✅ READY!' : `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`}</div>`;
+            }
+            
+            card.innerHTML = `
+                <div class="farm-name">${farm.name}</div>
+                <div class="farm-stats">
+                    <div class="stat"><div class="stat-label">🌱 Plants</div><div class="stat-value">${farm.plants}</div></div>
+                    <div class="stat"><div class="stat-label">🍅 Per Plant</div><div class="stat-value">${farm.perPlant}</div></div>
+                    <div class="stat"><div class="stat-label">💰 Per Harvest</div><div class="stat-value">${farm.total}</div></div>
+                    <div class="stat"><div class="stat-label">📊 Harvests</div><div class="stat-value">${farmData.harvestCount}</div></div>
+                </div>
+                ${timerHtml}
+                ${!isUnlocked ? 
+                    `<button onclick="window.unlockFarm(${index})">🔓 UNLOCK (${farm.cost} 🍅)</button>` : 
+                    `<button onclick="window.harvestFarm(${index})" ${!isReady ? 'disabled' : ''}>🌾 HARVEST (${farm.total} 🍅)</button>`
+                }
+            `;
+            slider.appendChild(card);
+        });
+        
+        const activeFarms = user.farms.filter(f => f.unlocked).length;
+        document.getElementById('activeFarms').innerText = activeFarms;
+        document.getElementById('farmBalance').innerText = user.balance;
+    }
+
+    // Update timers
+    function updateFarmTimers() {
+        const user = getCurrentUser();
+        if (!user) return;
+        
+        FARMS.forEach((farm, index) => {
+            const farmData = user.farms[index];
+            if (farmData.unlocked) {
+                const now = Date.now();
+                const cooldownMs = farm.cooldown * 60 * 1000;
+                const timeLeft = Math.max(0, cooldownMs - (now - (farmData.lastHarvest || 0)));
+                const isReady = timeLeft === 0;
+                
+                // Find the button for this farm
+                const cards = document.querySelectorAll('.farm-card');
+                if (cards[index]) {
+                    const timerDiv = cards[index].querySelector('.timer');
+                    const btn = cards[index].querySelector('button:last-child');
+                    
+                    if (timerDiv) {
+                        if (isReady) {
+                            timerDiv.textContent = '✅ READY!';
+                        } else {
+                            const mins = Math.floor(timeLeft / 60000);
+                            const secs = Math.floor((timeLeft % 60000) / 1000);
+                            timerDiv.textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+                        }
+                    }
+                    
+                    if (btn && btn.innerText.includes('HARVEST')) {
+                        btn.disabled = !isReady;
+                    }
+                }
+            }
+        });
+    }
+
+    // Update UI
+    function updateUI() {
+        const user = getCurrentUser();
+        if (!user) return;
+        
+        document.getElementById('balanceAmount').innerText = user.balance;
+        document.getElementById('nairaAmount').innerText = (user.balance * 0.1).toFixed(2);
+        document.getElementById('usernameDisplay').innerText = user.username;
+        document.getElementById('totalHarvestsDisplay').innerText = user.totalHarvests;
+        document.getElementById('refCount').innerText = user.referrals?.length || 0;
+        document.getElementById('refEarnings').innerText = user.refEarnings;
+        
+        const referralLink = `${window.location.origin}${window.location.pathname}?ref=${user.refCode}`;
+        document.getElementById('referralLink').innerHTML = referralLink;
+        
+        updateLeaderboard();
+    }
+
+    // Update leaderboard
+    function updateLeaderboard() {
+        const users = getUsers();
+        users.sort((a, b) => b.balance - a.balance);
+        const tbody = document.getElementById('leaderboardBody');
+        tbody.innerHTML = '';
+        users.slice(0, 10).forEach((user, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${user.username}</td>
+                    <td>${user.balance}</td>
+                    <td>${user.totalHarvests}</td>
+                </tr>
+            `;
+        });
+    }
+
+    // Daily bonus
+    function claimDaily() {
+        const user = getCurrentUser();
+        if (!user) return;
+        
+        const now = Date.now();
+        if (user.lastDaily && (now - user.lastDaily) < 86400000) {
+            alert('Already claimed today! Come back tomorrow.');
+            return;
+        }
+        
+        user.balance += 5;
+        user.lastDaily = now;
+        updateUser({ balance: user.balance, lastDaily: user.lastDaily });
+        alert('🎁 Claimed 5 tomatoes daily bonus!');
+    }
+
+    // Withdrawal
+    function processWithdrawal() {
+        const user = getCurrentUser();
+        if (!user) return;
+        
+        const amount = parseInt(document.getElementById('withdrawAmount').value);
+        const bank = document.getElementById('bankName').value;
+        const account = document.getElementById('accountNumber').value;
+        const name = document.getElementById('accountName').value;
+        
+        if (!bank || !account || !name || !amount) {
+            document.getElementById('withdrawMessage').innerText = 'Please fill all fields';
+            return;
+        }
+        
+        if (amount < 4000) {
+            document.getElementById('withdrawMessage').innerText = 'Minimum withdrawal is 4000 tomatoes';
+            return;
+        }
+        
+        if (amount > user.balance) {
+            document.getElementById('withdrawMessage').innerText = 'Insufficient balance';
+            return;
+        }
+        
+        // Create withdrawal email
+        const subject = encodeURIComponent(`Withdrawal Request: ${user.username} - ${amount}🍅`);
+        const body = encodeURIComponent(`
+Withdrawal Details:
+-------------------
+Username: ${user.username}
+Phone: ${user.phone}
+Bank: ${bank}
+Account Number: ${account}
+Account Name: ${name}
+Amount: ${amount} Tomatoes
+Naira Value: ₦${amount * 0.1}
+Time: ${new Date().toLocaleString()}
+
+Please process this withdrawal manually.
+        `);
+        
+        window.location.href = `mailto:praisegod0333@gmail.com?subject=${subject}&body=${body}`;
+        
+        // Deduct balance
+        user.balance -= amount;
+        updateUser({ balance: user.balance });
+        
+        document.getElementById('withdrawMessage').innerHTML = '✅ Withdrawal request sent! Check your email.';
+        setTimeout(() => {
+            document.getElementById('withdrawMessage').innerHTML = '';
+        }, 3000);
+        
+        // Clear form
+        document.getElementById('bankName').value = '';
+        document.getElementById('accountNumber').value = '';
+        document.getElementById('accountName').value = '';
+        document.getElementById('withdrawAmount').value = '';
+    }
+
+    // Page navigation
+    let currentPage = 'home';
+    function showPage(pageName) {
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+        document.getElementById(`${pageName}Page`).classList.add('active');
+        currentPage = pageName;
+        
+        if (pageName === 'farm') {
+            renderFarms();
+        }
+    }
+
+    // Auth UI
+    function showAuth() {
+        document.body.innerHTML = `
+        <div class="container">
+            <div class="header">
+                <h1>🍅 TOMATOES HARVEST</h1>
+                <div class="balance">Premium Farming Game</div>
+            </div>
+            <div style="padding: 20px;">
+                <div id="loginForm">
+                    <h3 style="color: #f9d342;">Login</h3>
+                    <input type="tel" id="loginPhone" placeholder="Mobile Number" value="0800000000">
+                    <input type="password" id="loginPassword" placeholder="6-digit Password" maxlength="6" value="123456">
+                    <button id="doLogin">Sign In</button>
+                    <p style="text-align: center; margin: 15px; color: #f9e572;">Don't have an account?</p>
+                    <button id="showSignup">Create Account</button>
+                </div>
+                <div id="signupForm" style="display: none;">
+                    <h3 style="color: #f9d342;">Sign Up</h3>
+                    <input type="text" id="signupUsername" placeholder="Username">
+                    <input type="tel" id="signupPhone" placeholder="Mobile Number">
+                    <input type="password" id="signupPassword" placeholder="6-digit Password" maxlength="6">
+                    <input type="password" id="signupConfirm" placeholder="Confirm Password" maxlength="6">
+                    <button id="doSignup">Create Account</button>
+                    <p style="text-align: center; margin: 15px; color: #f9e572;">Already have an account?</p>
+                    <button id="showLogin">Back to Login</button>
+                </div>
+                <div id="authError" class="error"></div>
+            </div>
+        </div>
+        `;
+        
+        document.getElementById('doLogin')?.addEventListener('click', () => {
+            const phone = document.getElementById('loginPhone').value;
+            const pwd = document.getElementById('loginPassword').value;
+            if (login(phone, pwd)) {
+                initApp();
+            } else {
+                document.getElementById('authError').innerText = 'Invalid credentials! Use 0800000000 / 123456';
+            }
+        });
+        
+        document.getElementById('showSignup')?.addEventListener('click', () => {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'block';
+        });
+        
+        document.getElementById('showLogin')?.addEventListener('click', () => {
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+        });
+        
+        document.getElementById('doSignup')?.addEventListener('click', () => {
+            const username = document.getElementById('signupUsername').value;
+            const phone = document.getElementById('signupPhone').value;
+            const pwd = document.getElementById('signupPassword').value;
+            const confirm = document.getElementById('signupConfirm').value;
+            
+            if (!username || !phone) {
+                document.getElementById('authError').innerText = 'Please fill all fields';
+                return;
+            }
+            if (pwd.length !== 6 || !/^\d+$/.test(pwd)) {
+                document.getElementById('authError').innerText = 'Password must be 6 digits';
+                return;
+            }
+            if (pwd !== confirm) {
+                document.getElementById('authError').innerText = 'Passwords do not match';
+                return;
+            }
+            
+            if (signup(phone, pwd, username)) {
+                alert('Account created! Please login.');
+                document.getElementById('signupForm').style.display = 'none';
+                document.getElementById('loginForm').style.display = 'block';
+            } else {
+                document.getElementById('authError').innerText = 'Phone number already registered';
+            }
+        });
+    }
+
+    // Initialize app
+    function initApp() {
+        location.reload();
+    }
+
+    // Check if logged in
+    function checkAuth() {
+        const saved = localStorage.getItem('currentUser');
+        if (saved) {
+            currentUser = JSON.parse(saved);
+            setupApp();
+        } else {
+            showAuth();
+        }
+    }
+
+    // Setup main app
+    function setupApp() {
+        // Rebuild DOM for main app
+        location.reload();
+    }
+
+    // Main initialization
+    initStorage();
+    
+    // Check if user is logged in
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        
+        // Setup event listeners
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const page = btn.dataset.page;
+                showPage(page);
+            });
+        });
+        
+        document.getElementById('copyLink')?.addEventListener('click', () => {
+            const link = document.getElementById('referralLink').innerText;
+            navigator.clipboard.writeText(link).then(() => alert('Link copied!'));
+        });
+        
+        document.getElementById('withdrawBtn')?.addEventListener('click', processWithdrawal);
+        
+        // Add daily bonus button to home page
+        const homePage = document.getElementById('homePage');
+        if (homePage && !document.getElementById('dailyBonusBtn')) {
+            const bonusBtn = document.createElement('button');
+            bonusBtn.id = 'dailyBonusBtn';
+            bonusBtn.innerHTML = '🎁 Daily Bonus (5 🍅)';
+            bonusBtn.style.marginTop = '20px';
+            bonusBtn.onclick = claimDaily;
+            homePage.appendChild(bonusBtn);
+        }
+        
+        // Start timer interval
+        setInterval(() => {
+            if (currentPage === 'farm') {
+                updateFarmTimers();
+            }
+        }, 1000);
+        
+        // Initial render
+        updateUI();
+        renderFarms();
+        showPage('home');
+    } else {
+        showAuth();
+    }
+</script>
+</body>
+</html>
