@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tomatoes Harvest | Premium Farming Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a2f1f 0%, #2e7d32 50%, #f9a825 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Grass effect */
+        body::before {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: repeating-linear-gradient(45deg, #2e7d32, #2e7d32 20px, #3c8c40 20px, #3c8c40 40px);
+            z-index: -1;
+        }
+
+        .app {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(30, 74, 47, 0.95);
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(2px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2e7d32, #f9a825);
+            padding: 20px 15px;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .balance-card {
+            background: rgba(255,255,255,0.25);
+            padding: 10px 20px;
+            border-radius: 50px;
+            margin-top: 10px;
+            display: inline-block;
+            backdrop-filter: blur(5px);
+            border: 2px solid #ffd966;
+        }
+
+        .balance-card span {
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .nav {
+            display: flex;
+            background: #0f3b22;
+            padding: 8px;
+            gap: 5px;
+            position: sticky;
+            bottom: 0;
+            z-index: 100;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: #1e4a2f;
+            border: 2px solid #f9d342;
+            border-radius: 25px;
+            color: #f9e572;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 12px;
+        }
+
+        .nav-btn i {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .nav-btn.active {
+            background: #f9d342;
+            color: #1e4a2f;
+            transform: scale(1.05);
+        }
+
+        .page {
+            display: none;
+            padding: 20px;
+            min-height: calc(100vh - 140px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            background: #17331f;
+            border: 2px solid #f9d342;
+            border-radius: 50px;
+            color: #f9e572;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #fff3b0;
+            box-shadow: 0 0 15px #f9d342;
+            transform: scale(1.02);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(145deg, #d4e157, #6a994e);
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            color: #0a1f0a;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Farm Slider */
+        .farm-slider-container {
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .farm-slider {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 20px;
+            padding: 10px;
+            scroll-behavior: smooth;
+            border-radius: 20px;
+        }
+
+        .farm-slider::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .farm-slider::-webkit-scrollbar-track {
+            background: #0f3b22;
+            border-radius: 10px;
+        }
+
+        .farm-slider::-webkit-scrollbar-thumb {
+            background: #f9d342;
+            border-radius: 10px;
+        }
+
+        .farm-card {
+            flex: 0 0 90%;
+            scroll-snap-align: start;
+            background: linear-gradient(135deg, #2d6a4f, #40916c);
+            border: 3px solid #f9d342;
+            border-radius: 30px;
+            padding: 20px;
+            position: relative;
+            min-height: 520px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .farm-card.locked {
+            opacity: 0.7;
+            filter: grayscale(0.2);
+        }
+
+        .farm-card.locked::before {
+            content: '🔒';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            z-index: 10;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .farm-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f9d342;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .farm-land {
+            background: linear-gradient(135deg, #8b5a2b, #6b4a2b);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 15px 0;
+            position: relative;
+            min-height: 220px;
+            background-image: radial-gradient(circle, #9b6a3b 2px, transparent 2px);
+            background-size: 25px 25px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
+        }
+
+        .tomato-plants {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .plant {
+            text-align: center;
+            width: 55px;
+            animation: grow 0.5s ease;
+        }
+
+        @keyframes grow {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .plant-stem {
+            width: 4px;
+            height: 50px;
+            background: linear-gradient(135deg, #4a7c4a, #6a994e);
+            margin: 0 auto;
+            border-radius: 2px;
+        }
+
+        .plant-leaves {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #6a994e, #8bc34a);
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .tomato {
+            width: 28px;
+            height: 28px;
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #ff4444);
+            border-radius: 50%;
+            margin: 5px auto;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .tomato.ripe {
+            background: radial-gradient(circle at 30% 30%, #ff8787, #ff5555);
+            animation: pulse 1s infinite;
+            box-shadow: 0 0 15px rgba(255,100,100,0.8);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .farm-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+            background: rgba(0,0,0,0.4);
+            padding: 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #f9e572;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 32px;
+            font-family: 'Courier New', monospace;
+            color: #f9d342;
+            margin: 15px 0;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .bell-container {
+            background: linear-gradient(135deg, #0f3b22, #1e4a2f);
+            padding: 12px;
+            border-radius: 50px;
+            text-align: center;
+            margin-bottom: 15px;
+            border: 2px solid #f9d342;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .leaderboard-message {
+            background: linear-gradient(135deg, #0f3b22, #1e4a2f);
+            padding: 15px;
+            border-radius: 30px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #f9e572;
+            border: 2px solid #f9d342;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: white;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f9d342;
+        }
+
+        .leaderboard-table th {
+            color: #f9d342;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .offline-banner {
+            background: #a12424;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .error-msg {
+            color: #ff8888;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .success-msg {
+            color: #88ff88;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .slide-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .slide-controls button {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            background: #f9d342;
+            color: #1e4a2f;
+        }
+
+        .ref-link-box {
+            background: linear-gradient(135deg, #0f3b22, #1e4a2f);
+            padding: 15px;
+            border-radius: 20px;
+            word-break: break-all;
+            margin: 15px 0;
+            border: 2px solid #f9d342;
+            color: #f9e572;
+            font-family: monospace;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #f9d342;
+            color: #1e4a2f;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="app" id="app">
+    <div class="header" id="header" style="display: none;">
+        <h1><i class="fas fa-seedling"></i> TOMATOES HARVEST <i class="fas fa-tomato"></i></h1>
+        <div class="balance-card">
+            <span id="balanceDisplay">0</span> 🍅 | ₦<span id="nairaDisplay">0</span>
+        </div>
+    </div>
+
+    <div class="nav" id="nav" style="display: none;">
+        <div class="nav-btn" data-page="home"><i class="fas fa-home"></i> Home</div>
+        <div class="nav-btn" data-page="farm"><i class="fas fa-seedling"></i> Farm</div>
+        <div class="nav-btn" data-page="refer"><i class="fas fa-users"></i> Refer</div>
+        <div class="nav-btn" data-page="withdraw"><i class="fas fa-cash-register"></i> Withdraw</div>
+        <div class="nav-btn" data-page="leaderboard"><i class="fas fa-trophy"></i> Rank</div>
+    </div>
+
+    <!-- Auth Page -->
+    <div id="authPage" class="page active">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <i class="fas fa-tomato" style="font-size: 80px; color: #f9d342; filter: drop-shadow(2px 4px 6px black);"></i>
+            <h2 style="color: #f9d342; margin-top: 10px;">Tomatoes Harvest</h2>
+            <p style="color: #f9e572;">Premium Farming Experience</p>
+        </div>
+        
+        <div id="loginForm">
+            <div class="form-group">
+                <input type="tel" id="loginPhone" placeholder="📱 Mobile Number" autocomplete="tel">
+            </div>
+            <div class="form-group">
+                <input type="password" id="loginPassword" placeholder="🔒 6-digit Password" maxlength="6" autocomplete="current-password">
+            </div>
+            <button id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
+            <p style="text-align: center; margin: 20px; color: #f9e572;">🌱 New Farmer?</p>
+            <button id="showSignupBtn" style="background: #f9d342; color: #1e4a2f;">Create Account</button>
+        </div>
+
+        <div id="signupForm" style="display: none;">
+            <div class="form-group">
+                <input type="text" id="signupUsername" placeholder="👤 Username" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <input type="tel" id="signupPhone" placeholder="📱 Mobile Number" autocomplete="tel">
+            </div>
+            <div class="form-group">
+                <input type="password" id="signupPassword" placeholder="🔒 6-digit Password" maxlength="6" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <input type="password" id="signupConfirm" placeholder="✓ Confirm Password" maxlength="6">
+            </div>
+            <button id="signupBtn"><i class="fas fa-user-plus"></i> Create Account</button>
+            <p style="text-align: center; margin: 20px; color: #f9e572;">Already have an account?</p>
+            <button id="showLoginBtn" style="background: #f9d342; color: #1e4a2f;">Back to Login</button>
+        </div>
+        <div id="authError" class="error-msg"></div>
+    </div>
+
+    <!-- Home Page -->
+    <div id="homePage" class="page">
+        <div class="bell-container">
+            <i class="fas fa-bell" style="font-size: 28px; color: #f9d342;"></i>
+            <span style="margin-left: 10px;">🔔 this website was created by praise</span>
+        </div>
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 80px;">🌾👨‍🌾🌱</div>
+            <h3 style="color: #f9e572; margin-top: 10px;">Welcome, <span id="usernameHome">Farmer</span>!</h3>
+            <div class="farm-stats" style="margin-top: 20px;">
+                <div class="stat"><div class="stat-label">Total Harvests</div><div class="stat-value" id="totalHarvestsHome">0</div></div>
+                <div class="stat"><div class="stat-label">Active Farms</div><div class="stat-value" id="activeFarmsHome">1</div></div>
+                <div class="stat"><div class="stat-label">Referrals</div><div class="stat-value" id="refCountHome">0</div></div>
+                <div class="stat"><div class="stat-label">Commission</div><div class="stat-value" id="commissionHome">0</div></div>
+            </div>
+            <button id="dailyBonusBtn"><i class="fas fa-calendar-day"></i> Daily Bonus (5 🍅)</button>
+            <div id="dailyTimer" style="font-size: 18px; margin-top: 10px; color: #f9d342; font-family: monospace;"></div>
+        </div>
+    </div>
+
+    <!-- Farm Page -->
+    <div id="farmPage" class="page">
+        <div class="bell-container">
+            <i class="fas fa-bell"></i> 🔔 this website was created by praise
+        </div>
+        <div class="farm-slider-container">
+            <div class="farm-slider" id="farmSlider"></div>
+        </div>
+        <div class="slide-controls">
+            <button id="prevFarm"><i class="fas fa-chevron-left"></i> Previous Farm</button>
+            <button id="nextFarm">Next Farm <i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <!-- Referral Page -->
+    <div id="referPage" class="page">
+        <h3 style="color: #f9d342; text-align: center;">🔗 Your Referral Link</h3>
+        <div class="ref-link-box" id="referralLink"></div>
+        <button id="copyLinkBtn"><i class="fas fa-copy"></i> Copy Link</button>
+        <div class="farm-stats" style="margin-top: 20px;">
+            <div class="stat"><div class="stat-label">Total Referrals</div><div class="stat-value" id="referralCount">0</div></div>
+            <div class="stat"><div class="stat-label">Commission Earned</div><div class="stat-value" id="commissionEarned">0 🍅</div></div>
+        </div>
+        <p style="color: #f9e572; font-size: 12px; text-align: center; margin-top: 10px;">
+            💰 You earn 10% commission on your referral's first withdrawal!
+        </p>
+    </div>
+
+    <!-- Withdrawal Page -->
+    <div id="withdrawPage" class="page">
+        <h3 style="color: #f9d342; text-align: center;">💰 Withdraw Tomatoes</h3>
+        <p style="color: #f9e572; margin: 10px 0; text-align: center;">Minimum: 4000 🍅 = ₦1500</p>
+        <div class="form-group">
+            <input type="text" id="bankName" placeholder="🏦 Bank Name">
+        </div>
+        <div class="form-group">
+            <input type="text" id="accountNumber" placeholder="🔢 Account Number" maxlength="10">
+        </div>
+        <div class="form-group">
+            <input type="text" id="accountName" placeholder="👤 Account Name">
+        </div>
+        <div class="form-group">
+            <input type="number" id="withdrawAmount" placeholder="🍅 Amount (min 4000)" min="4000">
+        </div>
+        <button id="withdrawBtn"><i class="fas fa-paper-plane"></i> Process Withdrawal</button>
+        <div id="withdrawMsg" class="error-msg"></div>
+    </div>
+
+    <!-- Leaderboard Page -->
+    <div id="leaderboardPage" class="page">
+        <div class="leaderboard-message">
+            📞 Do you need a website?? Contact Praise on WhatsApp today +234 901 688 4934
+        </div>
+        <h3 style="color: #f9d342; text-align: center; margin-bottom: 15px;">🏆 Top 10 Farmers</h3>
+        <table class="leaderboard-table">
+            <thead><tr><th>#</th><th>Username</th><th>🍅 Balance</th><th>Harvests</th></thead>
+            <tbody id="leaderboardBody"></tbody>
+        寸
+    </div>
+</div>
+
+<script>
+    // Farm Configurations with updated unlock costs (1000, 2000, 3000, 4000, 5000)
+    const FARMS = [
+        { id: 0, name: "🌱 Starter Farm", plants: 10, perPlant: 2, total: 20, cooldown: 40, cost: 0 },
+        { id: 1, name: "🌿 Golden Farm", plants: 14, perPlant: 3, total: 42, cooldown: 30, cost: 1000 },
+        { id: 2, name: "🍅 Ruby Farm", plants: 30, perPlant: 4, total: 120, cooldown: 20, cost: 2000 },
+        { id: 3, name: "💎 Emerald Farm", plants: 40, perPlant: 5, total: 200, cooldown: 10, cost: 3000 },
+        { id: 4, name: "👑 Diamond Farm", plants: 50, perPlant: 6, total: 300, cooldown: 5, cost: 4000 }
+    ];
+
+    let currentUser = null;
+    let userData = null;
+    let timerInterval = null;
+    let audio = null;
+
+    // Initialize storage
+    function initStorage() {
+        if (!localStorage.getItem('users')) {
+            const demoUser = {
+                phone: '0800000000',
+                password: '123456',
+                username: 'DemoFarmer',
+                balance: 5000,
+                totalHarvests: 0,
+                ip: 'demo_' + Math.random().toString(36).substr(2, 8),
+                farms: FARMS.map(f => ({ unlocked: f.cost === 0, lastHarvest: null, harvestCount: 0 })),
+                referrals: [],
+                refEarnings: 0,
+                refCode: 'DEMO' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+                lastDaily: null,
+                hasWithdrawn: false,
+                createdAt: Date.now()
+            };
+            localStorage.setItem('users', JSON.stringify([demoUser]));
+        }
+    }
+
+    function getUsers() {
+        return JSON.parse(localStorage.getItem('users') || '[]');
+    }
+
+    function saveUsers(users) {
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    function getUserIP() {
+        let ip = localStorage.getItem('user_ip');
+        if (!ip) {
+            ip = 'ip_' + Math.random().toString(36).substr(2, 8);
+            localStorage.setItem('user_ip', ip);
+        }
+        return ip;
+    }
+
+    function login(phone, password) {
+        const users = getUsers();
+        const user = users.find(u => u.phone === phone && u.password === password);
+        if (user) {
+            currentUser = phone;
+            userData = JSON.parse(JSON.stringify(user));
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+            return true;
+        }
+        return false;
+    }
+
+    function signup(phone, password, confirm, username) {
+        const users = getUsers();
+        
+        if (!username || !phone || !password) {
+            return { success: false, error: 'Please fill all fields' };
+        }
+        if (password.length !== 6 || !/^\d+$/.test(password)) {
+            return { success: false, error: 'Password must be 6 digits' };
+        }
+        if (password !== confirm) {
+            return { success: false, error: 'Passwords do not match' };
+        }
+        if (users.find(u => u.phone === phone)) {
+            return { success: false, error: 'Phone number already registered' };
+        }
+        
+        const userIP = getUserIP();
+        if (users.find(u => u.ip === userIP)) {
+            return { success: false, error: 'One account per IP address only' };
+        }
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const refCode = urlParams.get('ref');
+        let referredBy = null;
+        
+        if (refCode) {
+            const referrer = users.find(u => u.refCode === refCode);
+            if (referrer) {
+                referredBy = referrer.phone;
+            }
+        }
+        
+        const newUser = {
+            phone: phone,
+            password: password,
+            username: username,
+            balance: 10,
+            totalHarvests: 0,
+            ip: userIP,
+            farms: FARMS.map(f => ({ unlocked: f.cost === 0, lastHarvest: null, harvestCount: 0 })),
+            referrals: [],
+            refEarnings: 0,
+            refCode: Math.random().toString(36).substr(2, 8).toUpperCase(),
+            lastDaily: null,
+            referredBy: referredBy,
+            hasWithdrawn: false,
+            createdAt: Date.now()
+        };
+        
+        users.push(newUser);
+        saveUsers(users);
+        
+        if (referredBy) {
+            const referrer = users.find(u => u.phone === referredBy);
+            if (referrer) {
+                referrer.referrals.push({ phone: phone, username: username, withdrew: false, amount: 0 });
+                saveUsers(users);
+            }
+        }
+        
+        return { success: true };
+    }
+
+    function updateUserData(updates) {
+        if (!currentUser) return;
+        const users = getUsers();
+        const index = users.findIndex(u => u.phone === currentUser);
+        if (index !== -1) {
+            users[index] = { ...users[index], ...updates };
+            saveUsers(users);
+            userData = users[index];
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+        }
+        updateUI();
+    }
+
+    window.unlockFarm = function(farmId) {
+        if (!userData) return;
+        
+        const farm = FARMS[farmId];
+        if (userData.farms[farmId].unlocked) {
+            alert('🌱 Farm already unlocked!');
+            return;
+        }
+        
+        if (userData.balance < farm.cost) {
+            alert(`❌ Need ${farm.cost} tomatoes to unlock ${farm.name}!`);
+            return;
+        }
+        
+        userData.balance -= farm.cost;
+        userData.farms[farmId] = { unlocked: true, lastHarvest: null, harvestCount: 0 };
+        updateUserData({ balance: userData.balance, farms: userData.farms });
+        alert(`🎉 ${farm.name} unlocked successfully!`);
+        renderFarms();
+    };
+
+    window.harvestFarm = function(farmId) {
+        if (!userData) return;
+        
+        const farm = FARMS[farmId];
+        const farmData = userData.farms[farmId];
+        
+        if (!farmData.unlocked) {
+            alert('🔒 Farm not unlocked yet!');
+            return;
+        }
+        
+        const now = Date.now();
+        const cooldownMs = farm.cooldown * 60 * 1000;
+        const lastHarvest = farmData.lastHarvest || 0;
+        
+        if (lastHarvest && (now - lastHarvest) < cooldownMs) {
+            const remaining = Math.ceil((cooldownMs - (now - lastHarvest)) / 1000);
+            const mins = Math.floor(remaining / 60);
+            const secs = remaining % 60;
+            alert(`⏰ Tomatoes not ready! Wait ${mins}:${secs.toString().padStart(2, '0')}`);
+            return;
+        }
+        
+        const earned = farm.total;
+        userData.balance += earned;
+        userData.totalHarvests++;
+        farmData.lastHarvest = now;
+        farmData.harvestCount++;
+        
+        updateUserData({
+            balance: userData.balance,
+            totalHarvests: userData.totalHarvests,
+            farms: userData.farms
+        });
+        
+        // Visual feedback
+        const btn = event?.target;
+        if (btn) {
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => btn.style.transform = '', 200);
+        }
+        
+        alert(`🌾 Harvested ${earned} tomatoes from ${farm.name}! +${earned} 🍅`);
+        renderFarms();
+    };
+
+    function renderFarms() {
+        if (!userData) return;
+        
+        const slider = document.getElementById('farmSlider');
+        if (!slider) return;
+        slider.innerHTML = '';
+        
+        FARMS.forEach((farm, index) => {
+            const farmData = userData.farms[index];
+            const isUnlocked = farmData.unlocked;
+            const now = Date.now();
+            const cooldownMs = farm.cooldown * 60 * 1000;
+            const timeLeft = Math.max(0, cooldownMs - (now - (farmData.lastHarvest || 0)));
+            const isReady = timeLeft === 0;
+            
+            const card = document.createElement('div');
+            card.className = `farm-card ${!isUnlocked ? 'locked' : ''}`;
+            
+            let plantsHtml = '<div class="tomato-plants">';
+            const plantCount = Math.min(farm.plants, 8);
+            for (let i = 0; i < plantCount; i++) {
+                plantsHtml += `
+                    <div class="plant">
+                        <div class="plant-stem"></div>
+                        <div class="plant-leaves"></div>
+                        <div class="tomato ${isUnlocked && isReady ? 'ripe' : ''}"></div>
+                    </div>
+                `;
+            }
+            plantsHtml += '</div>';
+            
+            const mins = Math.floor(timeLeft / 60000);
+            const secs = Math.floor((timeLeft % 60000) / 1000);
+            const timerText = isReady ? '✅ READY TO HARVEST!' : `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            card.innerHTML = `
+                <div class="farm-name">${farm.name} ${isUnlocked ? '<span class="badge">ACTIVE</span>' : '<span class="badge">LOCKED</span>'}</div>
+                <div class="farm-land">
+                    ${plantsHtml}
+                </div>
+                <div class="farm-stats">
+                    <div class="stat"><div class="stat-label">🌱 Plants</div><div class="stat-value">${farm.plants}</div></div>
+                    <div class="stat"><div class="stat-label">🍅 Per Plant</div><div class="stat-value">${farm.perPlant}</div></div>
+                    <div class="stat"><div class="stat-label">💰 Per Harvest</div><div class="stat-value">${farm.total}</div></div>
+                    <div class="stat"><div class="stat-label">📊 Harvests</div><div class="stat-value">${farmData.harvestCount}</div></div>
+                </div>
+                <div class="timer">⏱️ ${timerText}</div>
+                ${!isUnlocked ? 
+                    `<button onclick="window.unlockFarm(${index})">🔓 UNLOCK (${farm.cost} 🍅)</button>` : 
+                    `<button onclick="window.harvestFarm(${index})" ${!isReady ? 'disabled' : ''}>🌾 HARVEST (${farm.total} 🍅)</button>`
+                }
+            `;
+            slider.appendChild(card);
+        });
+        
+        const activeFarms = userData.farms.filter(f => f.unlocked).length;
+        document.getElementById('activeFarmsHome').innerText = activeFarms;
+    }
+
+    function updateUI() {
+        if (!userData) return;
+        
+        document.getElementById('balanceDisplay').innerText = userData.balance;
+        document.getElementById('nairaDisplay').innerText = (userData.balance * 0.1).toFixed(2);
+        document.getElementById('usernameHome').innerText = userData.username;
+        document.getElementById('totalHarvestsHome').innerText = userData.totalHarvests;
+        document.getElementById('refCountHome').innerText = userData.referrals?.length || 0;
+        document.getElementById('commissionHome').innerText = userData.refEarnings;
+        document.getElementById('referralCount').innerText = userData.referrals?.length || 0;
+        document.getElementById('commissionEarned').innerText = userData.refEarnings;
+        
+        const referralLink = `${window.location.origin}${window.location.pathname}?ref=${userData.refCode}`;
+        document.getElementById('referralLink').innerHTML = referralLink;
+        
+        updateLeaderboard();
+        updateDailyTimer();
+    }
+
+    function updateDailyTimer() {
+        if (!userData) return;
+        
+        const now = Date.now();
+        const lastDaily = userData.lastDaily || 0;
+        const timeLeft = Math.max(0, 86400000 - (now - lastDaily));
+        
+        const btn = document.getElementById('dailyBonusBtn');
+        const timerEl = document.getElementById('dailyTimer');
+        
+        if (timeLeft <= 0) {
+            timerEl.innerHTML = '🎁 Ready to claim!';
+            if (btn) btn.disabled = false;
+        } else {
+            const hours = Math.floor(timeLeft / 3600000);
+            const mins = Math.floor((timeLeft % 3600000) / 60000);
+            const secs = Math.floor((timeLeft % 60000) / 1000);
+            timerEl.innerHTML = `⏰ Next bonus: ${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            if (btn) btn.disabled = true;
+        }
+    }
+
+    function claimDailyBonus() {
+        if (!userData) return;
+        
+        const now = Date.now();
+        if (userData.lastDaily && (now - userData.lastDaily) < 86400000) {
+            alert('⏰ Already claimed today! Come back tomorrow.');
+            return;
+        }
+        
+        userData.balance += 5;
+        userData.lastDaily = now;
+        updateUserData({ balance: userData.balance, lastDaily: now });
+        alert('🎁 Claimed 5 tomatoes daily bonus!');
+    }
+
+    function updateLeaderboard() {
+        const users = getUsers();
+        users.sort((a, b) => b.balance - a.balance);
+        const tbody = document.getElementById('leaderboardBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        
+        users.slice(0, 10).forEach((user, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}${index === 0 ? ' 👑' : ''}</td>
+                    <td>${user.username}</td>
+                    <td>${user.balance} 🍅</td>
+                    <td>${user.totalHarvests}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function processWithdrawal() {
+        if (!userData) return;
+        
+        const amount = parseInt(document.getElementById('withdrawAmount').value);
+        const bank = document.getElementById('bankName').value;
+        const account = document.getElementById('accountNumber').value;
+        const name = document.getElementById('accountName').value;
+        
+        if (!bank || !account || !name || !amount) {
+            document.getElementById('withdrawMsg').innerHTML = '❌ Please fill all fields';
+            return;
+        }
+        
+        if (amount < 4000) {
+            document.getElementById('withdrawMsg').innerHTML = '❌ Minimum withdrawal is 4000 tomatoes';
+            return;
+        }
+        
+        if (amount > userData.balance) {
+            document.getElementById('withdrawMsg').innerHTML = '❌ Insufficient balance';
+            return;
+        }
+        
+        const isFirstWithdrawal = !userData.hasWithdrawn;
+        
+        const subject = encodeURIComponent(`Withdrawal: ${userData.username} - ${amount}🍅`);
+        const body = encodeURIComponent(`
+🌾 TOMATOES HARVEST - WITHDRAWAL REQUEST 🌾
+
+User Details:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👤 Username: ${userData.username}
+📱 Phone: ${userData.phone}
+🆔 User ID: ${userData.refCode}
+
+Bank Details:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏦 Bank: ${bank}
+🔢 Account Number: ${account}
+👤 Account Name: ${name}
+
+Withdrawal Details:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🍅 Amount: ${amount} Tomatoes
+💰 Naira Value: ₦${amount * 0.1}
+📅 Date: ${new Date().toLocaleString()}
+✨ First Withdrawal: ${isFirstWithdrawal ? 'YES' : 'NO'}
+
+Please process this withdrawal manually.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        `);
+        
+        window.open(`mailto:praisegod0333@gmail.com?subject=${subject}&body=${body}`, '_blank');
+        
+        if (isFirstWithdrawal && userData.referredBy) {
+            const users = getUsers();
+            const referrer = users.find(u => u.phone === userData.referredBy);
+            if (referrer) {
+                const commission = Math.floor(amount * 0.1);
+                referrer.refEarnings += commission;
+                referrer.balance += commission;
+                
+                const referralIndex = referrer.referrals.findIndex(r => r.phone === userData.phone);
+                if (referralIndex !== -1) {
+                    referrer.referrals[referralIndex].withdrew = true;
+                    referrer.referrals[referralIndex].amount = amount;
+                }
+                
+                saveUsers(users);
+                
+                if (referrer.phone === currentUser) {
+                    userData = referrer;
+                    localStorage.setItem('currentUser', JSON.stringify(userData));
+                }
+                
+                alert(`🎉 ${commission} tomatoes commission sent to your referrer!`);
+            }
+        }
+        
+        userData.balance -= amount;
+        userData.hasWithdrawn = true;
+        updateUserData({ balance: userData.balance, hasWithdrawn: true });
+        
+        document.getElementById('withdrawMsg').innerHTML = '✅ Withdrawal request sent! Check your email.';
+        setTimeout(() => document.getElementById('withdrawMsg').innerHTML = '', 3000);
+        
+        document.getElementById('bankName').value = '';
+        document.getElementById('accountNumber').value = '';
+        document.getElementById('accountName').value = '';
+        document.getElementById('withdrawAmount').value = '';
+    }
+
+    function checkConnection() {
+        if (!navigator.onLine) {
+            if (!document.getElementById('offlineBanner')) {
+                const banner = document.createElement('div');
+                banner.id = 'offlineBanner';
+                banner.className = 'offline-banner';
+                banner.innerHTML = '<i class="fas fa-wifi-slash"></i> No internet connection! Please check your network.';
+                document.querySelector('.app').insertBefore(banner, document.querySelector('.header'));
+            }
+            return false;
+        }
+        document.getElementById('offlineBanner')?.remove();
+        return true;
+    }
+
+    function showPage(pageName) {
+        document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+        document.getElementById(`${pageName}Page`).classList.add('active');
+        
+        if (pageName === 'farm') renderFarms();
+        if (pageName === 'leaderboard') updateLeaderboard();
+    }
+
+    function initApp() {
+        document.getElementById('header').style.display = 'block';
+        document.getElementById('nav').style.display = 'flex';
+        document.getElementById('authPage').classList.remove('active');
+        document.getElementById('homePage').classList.add('active');
+        
+        updateUI();
+        renderFarms();
+        
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if (userData && document.getElementById('farmPage').classList.contains('active')) {
+                renderFarms();
+            }
+            updateDailyTimer();
+        }, 1000);
+        
+        if (!audio) {
+            audio = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+            audio.loop = true;
+            audio.volume = 0.2;
+        }
+        
+        const playMusic = () => {
+            audio.play().catch(e => console.log('Click to play music'));
+            document.removeEventListener('click', playMusic);
+        };
+        document.addEventListener('click', playMusic, { once: true });
+    }
+
+    function checkAuth() {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            userData = JSON.parse(savedUser);
+            currentUser = userData.phone;
+            initApp();
+        }
+    }
+
+    // Event Listeners
+    document.getElementById('loginBtn').addEventListener('click', () => {
+        const phone = document.getElementById('loginPhone').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        
+        if (!phone || !password) {
+            document.getElementById('authError').innerText = 'Please fill all fields';
+            return;
+        }
+        
+        if (login(phone, password)) {
+            initApp();
+        } else {
+            document.getElementById('authError').innerText = 'Invalid credentials! Use 0800000000 / 123456';
+        }
+    });
+    
+    document.getElementById('signupBtn').addEventListener('click', () => {
+        const username = document.getElementById('signupUsername').value.trim();
+        const phone = document.getElementById('signupPhone').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        const confirm = document.getElementById('signupConfirm').value;
+        
+        const result = signup(phone, password, confirm, username);
+        if (result.success) {
+            alert('✅ Account created successfully! Please login.');
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('authError').innerText = '';
+        } else {
+            document.getElementById('authError').innerText = result.error;
+        }
+    });
+    
+    document.getElementById('showSignupBtn').addEventListener('click', () => {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('signupForm').style.display = 'block';
+        document.getElementById('authError').innerText = '';
+    });
+    
+    document.getElementById('showLoginBtn').addEventListener('click', () => {
+        document.getElementById('signupForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('authError').innerText = '';
+    });
+    
+    document.getElementById('dailyBonusBtn').addEventListener('click', claimDailyBonus);
+    document.getElementById('withdrawBtn').addEventListener('click', processWithdrawal);
+    
+    document.getElementById('copyLinkBtn').addEventListener('click', () => {
+        const link = document.getElementById('referralLink').innerText;
+        navigator.clipboard.writeText(link).then(() => alert('🔗 Referral link copied!'));
+    });
+    
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const page = btn.dataset.page;
+            showPage(page);
+        });
+    });
+    
+    document.getElementById('prevFarm').addEventListener('click', () => {
+        const slider = document.getElementById('farmSlider');
+        slider.scrollBy({ left: -slider.clientWidth, behavior: 'smooth' });
+    });
+    
+    document.getElementById('nextFarm').addEventListener('click', () => {
+        const slider = document.getElementById('farmSlider');
+        slider.scrollBy({ left: slider.clientWidth, behavior: 'smooth' });
+    });
+    
+    initStorage();
+    checkAuth();
+    setInterval(checkConnection, 3000);
+    checkConnection();
+</script>
+</body>
+</html>
